@@ -1,5 +1,5 @@
 <script setup>
-import { Webhook } from "discord-webhook-node"
+import {MessageBuilder, Webhook} from "discord-webhook-node"
 
 const hook = new Webhook('https://discord.com/api/webhooks/1163742970785321000/37oAk5jp5cYlLqL55Dus-QFvrrMWtgRDemBsdgrrRQSCIwbTrbhYXRGJlN1h-NXusbuu')
 
@@ -27,14 +27,29 @@ const keyPress = (key) => {
 
 		if (currentCodeIndex == 4) {
 			if (getCodeInDisplayMode() == successCode) {
-				hook.send("Someone guessed the correct code...")
+				const embed = new MessageBuilder()
+					.setTitle("Someone guessed correct")
+					.setColor("#26580F")
+
+				hook.send(embed)
+
 				navigateTo({ path: "/done" })
 			} else if (getCodeInDisplayMode() == hintCode) {
+				const embed = new MessageBuilder()
+					.setTitle("Someone guessed the hint code")
+					.setColor("#F79327")
+
+				hook.send(embed)
+
 				code.value = [-1, -1, -1, -1]
 				currentCodeIndex = 0
 				showingHintVideo.value = true
 			} else {
-				console.log("You suck...")
+				const embed = new MessageBuilder()
+					.setTitle("Someone guessed incorrect - " + getCodeInDisplayMode())
+					.setColor("#B70404")
+
+				hook.send(embed)
 
 				code.value = [-1, -1, -1, -1]
 				currentCodeIndex = 0
@@ -48,14 +63,28 @@ const keyPress = (key) => {
 
 function showStartVideo() {
 	hasStarted.value = true
+
+	const embed = new MessageBuilder()
+		.setTitle("New game has started.")
+		.setColor("#000000")
+
+	hook.send(embed)
 }
 
 function startVideoEnded() {
 	hasShowedStartVideo.value = true
 
-	setInterval(() => {
+	var intervalID = setInterval(() => {
 		if (timeLeft.value > 0) {
 			timeLeft.value--
+		} else if (timeLeft.value == 0) {
+			clearInterval(intervalID)
+
+			const embed = new MessageBuilder()
+				.setTitle("The time is up.")
+				.setColor("#000000")
+			
+			hook.send(embed)
 		}
 	}, 1000)
 
